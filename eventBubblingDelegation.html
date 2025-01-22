@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Handling Demo</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      .demo-section {
+        margin: 2rem 0;
+        padding: 2rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+
+      h2 {
+        margin-top: 0;
+        color: #2563eb;
+      }
+
+      .item-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .item-list li {
+        padding: 0.5rem 1rem;
+        margin: 0.5rem 0;
+        background: #f3f4f6;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .item-list li:hover {
+        background: #e5e7eb;
+      }
+
+      .item-list li.highlighted {
+        background: #bfdbfe;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 1rem 0;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      #event-bubbling-demo {
+        position: relative;
+      }
+
+      #outer,
+      #middle,
+      #inner {
+        padding: 2rem;
+        border: 2px solid;
+        margin: 1rem 0;
+        text-align: center;
+      }
+
+      #outer {
+        border-color: #2563eb;
+        background: #eff6ff;
+      }
+
+      #middle {
+        border-color: #059669;
+        background: #ecfdf5;
+      }
+
+      #inner {
+        border-color: #dc2626;
+        background: #fef2f2;
+        display: inline-block;
+      }
+
+      #event-log {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .log-entry {
+        margin: 0.25rem 0;
+        padding: 0.25rem 0;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .clear-log {
+        background: #64748b;
+        margin-left: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Event Delegation Demo -->
+    <section class="demo-section">
+      <h2>Event Delegation Demo</h2>
+      <button id="add-item">Add New Item</button>
+      <ul id="item-list" class="item-list">
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+      </ul>
+    </section>
+
+    <!-- Event Bubbling Demo -->
+    <section class="demo-section">
+      <h2>Event Bubbling Demo</h2>
+      <div id="outer">
+        Outer div
+        <div id="middle">
+          Middle section
+          <button id="inner">Click me (Inner button)</button>
+        </div>
+      </div>
+      <div id="event-log">
+        <div class="log-entry">
+          Click the nested elements to see event bubbling in action...
+        </div>
+      </div>
+      <button id="clear-log" class="clear-log">Clear Log</button>
+    </section>
+
+    <script>
+      // Event Delegation Demo
+      const itemList = document.getElementById("item-list");
+      const addItemButton = document.getElementById("add-item");
+      let itemCount = 3;
+
+      // Single event listener for all list items
+      itemList.addEventListener("click", (event) => {
+        if (event.target.tagName === "LI") {
+          // Toggle highlighted class
+          event.target.classList.toggle("highlighted");
+          console.log("Clicked:", event.target.textContent);
+        }
+      });
+
+      // Add new items dynamically
+      addItemButton.addEventListener("click", () => {
+        itemCount++;
+        const newItem = document.createElement("li");
+        newItem.textContent = `Item ${itemCount}`;
+        itemList.appendChild(newItem);
+      });
+
+      // Event Bubbling Demo
+      const outer = document.getElementById("outer");
+      const middle = document.getElementById("middle");
+      const inner = document.getElementById("inner");
+      const eventLog = document.getElementById("event-log");
+      const clearLogButton = document.getElementById("clear-log");
+
+      function logEvent(elementId, event) {
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        entry.textContent = `${elementId} clicked (${
+          event.eventPhase === 1
+            ? "Capture"
+            : event.eventPhase === 2
+            ? "Target"
+            : "Bubble"
+        } phase)`;
+        eventLog.insertBefore(entry, eventLog.firstChild);
+      }
+
+      // Attach listeners to all nested elements
+      [outer, middle, inner].forEach((element) => {
+        // Bubbling phase listener
+        element.addEventListener("click", (event) => {
+          logEvent(element.id, event);
+        });
+
+        // Capture phase listener
+        element.addEventListener(
+          "click",
+          (event) => {
+            logEvent(element.id, event);
+          },
+          true
+        );
+      });
+
+      // Clear log functionality
+      clearLogButton.addEventListener("click", () => {
+        eventLog.innerHTML =
+          '<div class="log-entry">Click the nested elements to see event bubbling in action...</div>';
+      });
+    </script>
+  </body>
+</html>
